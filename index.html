@@ -1,233 +1,762 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Sistema de Ponto</title>
+  <meta charset="UTF-8">
+  <title>Sistema de Ponto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body {font-family: Arial; background:#0f172a; color:white; text-align:center;}
-.box {background:#1e293b; padding:20px; margin:20px auto; width:320px; border-radius:10px;}
-input, button {margin:5px; padding:10px; width:90%; border-radius:5px; border:none;}
-button {background:#22c55e; color:white; cursor:pointer;}
-.hidden {display:none;}
-</style>
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #0f172a;
+      --accent: #22c55e;
+      --accent2: #3b82f6;
+      --accent3: #eab308;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1d283a, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .logo h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .logo span {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .card {
+      background: linear-gradient(145deg, #020617, #020617, #0f172a);
+      border-radius: 18px;
+      padding: 18px 16px 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at top, rgba(56, 189, 248, 0.12), transparent 60%);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h2 span.icon {
+      font-size: 1.2rem;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .field {
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      color: var(--muted);
+    }
+
+    .field input {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    .field input:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+      background: rgba(15, 23, 42, 1);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 9px 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    button:active {
+      transform: scale(0.97);
+      filter: brightness(0.95);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.35);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #eff6ff;
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.35);
+    }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: #fee2e2;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .tag span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .section {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .section h3 {
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section h3 span.icon {
+      font-size: 1rem;
+    }
+
+    #historico, #adminConteudo {
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 4px;
+      font-size: 0.8rem;
+    }
+
+    .item {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .item strong {
+      color: #e5e7eb;
+    }
+
+    .item small {
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.12);
+      color: #bbf7d0;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      margin-left: 4px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 16px 14px 14px;
+      }
+      h2 {
+        font-size: 1.05rem;
+      }
+      .logo h1 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="app">
+    <div class="logo">
+      <h1>Sistema de Ponto</h1>
+      <span>Acesso para todos os colaboradores</span>
+    </div>
 
-<div id="login" class="box">
-<h2>Login</h2>
-<input id="loginEmail" placeholder="Email">
-<input id="loginSenha" type="password" placeholder="Senha">
-<button onclick="login()">Entrar</button>
-<button onclick="mostrarCadastro()">Cadastrar</button>
-</div>
+    <!-- LOGIN -->
+    <div id="login" class="card">
+      <div class="card-inner">
+        <div class="tag">
+          <span class="dot"></span>
+          Login de acesso
+        </div>
+        <h2><span class="icon">🔐</span> Entrar no sistema</h2>
+        <p class="subtitle">Use seu email e senha cadastrados ou acesso de administrador.</p>
 
-<div id="cadastro" class="box hidden">
-<h2>Cadastro</h2>
-<input id="nome" placeholder="Nome">
-<input id="email" placeholder="Email">
-<input id="senha" type="password" placeholder="Senha">
-<button onclick="cadastrar()">Salvar</button>
-<button onclick="voltarLogin()">Voltar</button>
-</div>
+        <div class="field">
+          <label>Email</label>
+          <input id="loginEmail" type="email" placeholder="exemplo@empresa.com">
+        </div>
 
-<div id="painel" class="box hidden">
-<h2>Painel Funcionário</h2>
-<button onclick="baterPonto()">Bater Ponto</button>
-<button onclick="verHistorico()">Meu Histórico</button>
-<button onclick="abrirAdmin()">Admin</button>
-<button onclick="logout()">Sair</button>
-<div id="historico"></div>
-</div>
+        <div class="field">
+          <label>Senha</label>
+          <input id="loginSenha" type="password" placeholder="Digite sua senha">
+        </div>
 
-<div id="admin" class="box hidden">
-<h2>Painel Admin</h2>
-<button onclick="listarFuncionarios()">Funcionários</button>
-<button onclick="verTodosPontos()">Todos os Pontos</button>
-<button onclick="relatorioFuncionario()">Relatório</button>
-<button onclick="voltarPainel()">Voltar</button>
-<div id="adminConteudo"></div>
-</div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="login()">Entrar</button>
+          <button class="btn-secondary" onclick="mostrarCadastro()">Cadastrar</button>
+        </div>
 
-<script type="module">
+        <div class="section">
+          <h3><span class="icon">👑</span> Acesso do administrador</h3>
+          <p class="subtitle">
+            Email: <strong>admin@gmail.com</strong> · Senha: <strong>123456</strong>
+          </p>
+        </div>
+      </div>
+    </div>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <!-- CADASTRO -->
+    <div id="cadastro" class="card hidden">
+      <div class="card-inner">
+        <div class="tag">
+          <span class="dot"></span>
+          Novo colaborador
+        </div>
+        <h2><span class="icon">🧑‍💼</span> Cadastro de funcionário</h2>
+        <p class="subtitle">Preencha os dados do colaborador para liberar o acesso ao sistema.</p>
 
-// 🔥 CONFIG FIREBASE
-const firebaseConfig = {
-  apiKey: "SUA_CHAVE",
-  authDomain: "SEU_DOMINIO",
-  projectId: "SEU_PROJETO"
-};
+        <div class="field">
+          <label>Nome completo</label>
+          <input id="nome" placeholder="Nome do colaborador">
+        </div>
 
-// 🔐 ADMIN PADRÃO
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_SENHA = "123456";
+        <div class="field">
+          <label>Email</label>
+          <input id="email" type="email" placeholder="email@empresa.com">
+        </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+        <div class="field">
+          <label>Senha</label>
+          <input id="senha" type="password" placeholder="Crie uma senha">
+        </div>
 
-// TELAS
-window.mostrarCadastro = () => {
- login.classList.add("hidden");
- cadastro.classList.remove("hidden");
-};
+        <div class="btn-row">
+          <button class="btn-primary" onclick="cadastrar()">Salvar cadastro</button>
+          <button class="btn-ghost" onclick="voltarLogin()">Voltar</button>
+        </div>
+      </div>
+    </div>
 
-window.voltarLogin = () => {
- cadastro.classList.add("hidden");
- login.classList.remove("hidden");
-};
+    <!-- PAINEL FUNCIONÁRIO -->
+    <div id="painel" class="card hidden">
+      <div class="card-inner">
+        <div class="tag">
+          <span class="dot"></span>
+          Painel do colaborador
+        </div>
+        <h2><span class="icon">⏱️</span> Bater ponto</h2>
+        <p class="subtitle">Registre seus horários de trabalho e acompanhe seu histórico.</p>
 
-window.voltarPainel = () => {
- admin.classList.add("hidden");
- painel.classList.remove("hidden");
-};
+        <div class="btn-row">
+          <button class="btn-primary" onclick="baterPonto()">Bater ponto agora</button>
+          <button class="btn-secondary" onclick="verHistorico()">Ver meu histórico</button>
+        </div>
 
-// CADASTRO
-window.cadastrar = async () => {
- await addDoc(collection(db,"usuarios"),{
-  nome:nome.value,
-  email:email.value,
-  senha:senha.value
- });
- alert("Cadastrado!");
- voltarLogin();
-};
+        <div class="btn-row" style="margin-top:6px;">
+          <button class="btn-ghost" onclick="abrirAdmin()">Área do administrador</button>
+          <button class="btn-danger" onclick="logout()">Sair</button>
+        </div>
 
-// LOGIN
-window.login = async () => {
+        <div class="section">
+          <h3><span class="icon">📜</span> Histórico de pontos</h3>
+          <div id="historico"></div>
+        </div>
+      </div>
+    </div>
 
- // ADMIN DIRETO
- if (loginEmail.value === ADMIN_EMAIL && loginSenha.value === ADMIN_SENHA) {
-  localStorage.setItem("user", JSON.stringify({
-   nome:"Administrador",
-   email:ADMIN_EMAIL
-  }));
-  login.classList.add("hidden");
-  admin.classList.remove("hidden");
-  return;
- }
+    <!-- PAINEL ADMIN -->
+    <div id="admin" class="card hidden">
+      <div class="card-inner">
+        <div class="tag">
+          <span class="dot"></span>
+          Painel do administrador
+        </div>
+        <h2><span class="icon">📊</span> Gestão de pontos</h2>
+        <p class="subtitle">Visualize funcionários, pontos registrados e relatórios por colaborador.</p>
 
- const snap = await getDocs(collection(db,"usuarios"));
- let user=null;
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="listarFuncionarios()">Funcionários</button>
+          <button class="btn-primary" onclick="verTodosPontos()">Todos os pontos</button>
+        </div>
 
- snap.forEach(d=>{
-  const u=d.data();
-  if(u.email==loginEmail.value && u.senha==loginSenha.value){
-   user=u;
-  }
- });
+        <div class="btn-row" style="margin-top:6px;">
+          <button class="btn-ghost" onclick="relatorioFuncionario()">Relatório por funcionário</button>
+          <button class="btn-danger" onclick="voltarPainel()">Voltar</button>
+        </div>
 
- if(user){
-  localStorage.setItem("user",JSON.stringify(user));
-  login.classList.add("hidden");
-  painel.classList.remove("hidden");
- } else alert("Erro login");
-};
+        <div class="section">
+          <h3><span class="icon">📂</span> Dados</h3>
+          <div id="adminConteudo"></div>
+        </div>
+      </div>
+    </div>
 
-// PONTO
-window.baterPonto = async ()=>{
- const user=JSON.parse(localStorage.getItem("user"));
- await addDoc(collection(db,"pontos"),{
-  nome:user.nome,
-  data:new Date().toLocaleString()
- });
- alert("Ponto registrado");
-};
+    <div class="footer">
+      Sistema de Ponto · Todos os colaboradores com acesso
+    </div>
+  </div>
 
-// HISTÓRICO
-window.verHistorico = async ()=>{
- const user=JSON.parse(localStorage.getItem("user"));
- const snap = await getDocs(collection(db,"pontos"));
- historico.innerHTML="<h3>Histórico</h3>";
- snap.forEach(d=>{
-  const p=d.data();
-  if(p.nome==user.nome){
-   historico.innerHTML+=`<p>${p.data}</p>`;
-  }
- });
-};
+  <script type="module">
+    // IMPORTS FIREBASE
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// ADMIN
-window.abrirAdmin = ()=>{
- const user=JSON.parse(localStorage.getItem("user"));
- if(user.email !== ADMIN_EMAIL){
-  alert("Apenas admin");
-  return;
- }
- painel.classList.add("hidden");
- admin.classList.remove("hidden");
-};
+    // 🔥 CONFIG FIREBASE (TROCAR PELOS DADOS REAIS DO SEU PROJETO)
+    const firebaseConfig = {
+      apiKey: "SUA_CHAVE_AQUI",
+      authDomain: "SEU_DOMINIO_AQUI",
+      projectId: "SEU_PROJETO_AQUI"
+      // pode adicionar os outros campos se quiser (storageBucket, appId, etc.)
+    };
 
-// LISTAR FUNCIONÁRIOS
-window.listarFuncionarios = async ()=>{
- const snap = await getDocs(collection(db,"usuarios"));
- adminConteudo.innerHTML="<h3>Funcionários</h3>";
- snap.forEach(docSnap=>{
-  const u=docSnap.data();
-  const id=docSnap.id;
-  adminConteudo.innerHTML+=`
-   <div style="background:#334155; padding:10px; margin:5px;">
-    <p>${u.nome} - ${u.email}</p>
-    <button onclick="deletarFuncionario('${id}')">Deletar</button>
-   </div>
-  `;
- });
-};
+    // 🔐 ADMIN PADRÃO
+    const ADMIN_EMAIL = "admin@gmail.com";
+    const ADMIN_SENHA = "123456";
 
-// DELETAR
-window.deletarFuncionario = async (id)=>{
- if(!confirm("Deseja deletar?")) return;
- await deleteDoc(doc(db,"usuarios",id));
- alert("Deletado!");
- listarFuncionarios();
-};
+    // INICIALIZA FIREBASE
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-// TODOS PONTOS
-window.verTodosPontos = async ()=>{
- const snap = await getDocs(collection(db,"pontos"));
- adminConteudo.innerHTML="<h3>Todos Pontos</h3>";
- snap.forEach(d=>{
-  const p=d.data();
-  adminConteudo.innerHTML+=`<p>${p.nome} - ${p.data}</p>`;
- });
-};
+    // ELEMENTOS
+    const loginDiv = document.getElementById("login");
+    const cadastroDiv = document.getElementById("cadastro");
+    const painelDiv = document.getElementById("painel");
+    const adminDiv = document.getElementById("admin");
+    const historicoDiv = document.getElementById("historico");
+    const adminConteudoDiv = document.getElementById("adminConteudo");
 
-// RELATÓRIO
-window.relatorioFuncionario = async ()=>{
- const snap = await getDocs(collection(db,"usuarios"));
- adminConteudo.innerHTML="<h3>Selecionar Funcionário</h3>";
- snap.forEach(docSnap=>{
-  const u=docSnap.data();
-  adminConteudo.innerHTML+=`
-   <button onclick="verRelatorio('${u.nome}')">${u.nome}</button>
-  `;
- });
-};
+    const loginEmail = document.getElementById("loginEmail");
+    const loginSenha = document.getElementById("loginSenha");
+    const nomeInput = document.getElementById("nome");
+    const emailInput = document.getElementById("email");
+    const senhaInput = document.getElementById("senha");
 
-window.verRelatorio = async (nome)=>{
- const snap = await getDocs(collection(db,"pontos"));
- adminConteudo.innerHTML=`<h3>Relatório de ${nome}</h3>`;
- let total=0;
- snap.forEach(d=>{
-  const p=d.data();
-  if(p.nome===nome){
-   adminConteudo.innerHTML+=`<p>${p.data}</p>`;
-   total++;
-  }
- });
- adminConteudo.innerHTML+=`<hr><p>Total: ${total}</p>`;
-};
+    // TELAS
+    window.mostrarCadastro = () => {
+      loginDiv.classList.add("hidden");
+      cadastroDiv.classList.remove("hidden");
+    };
 
-// LOGOUT
-window.logout = ()=>{
- localStorage.removeItem("user");
- location.reload();
-};
+    window.voltarLogin = () => {
+      cadastroDiv.classList.add("hidden");
+      loginDiv.classList.remove("hidden");
+    };
 
-</script>
+    window.voltarPainel = () => {
+      adminDiv.classList.add("hidden");
+      painelDiv.classList.remove("hidden");
+    };
 
+    // CADASTRO
+    window.cadastrar = async () => {
+      if (!nomeInput.value || !emailInput.value || !senhaInput.value) {
+        alert("Preencha todos os campos");
+        return;
+      }
+
+      try {
+        const q = query(collection(db, "usuarios"), where("email", "==", emailInput.value));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          alert("Email já cadastrado");
+          return;
+        }
+
+        await addDoc(collection(db, "usuarios"), {
+          nome: nomeInput.value,
+          email: emailInput.value,
+          senha: senhaInput.value
+        });
+
+        alert("Cadastrado com sucesso!");
+        nomeInput.value = "";
+        emailInput.value = "";
+        senhaInput.value = "";
+        voltarLogin();
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao cadastrar");
+      }
+    };
+
+    // LOGIN
+    window.login = async () => {
+      const email = loginEmail.value.trim();
+      const senha = loginSenha.value.trim();
+
+      if (!email || !senha) {
+        alert("Preencha email e senha");
+        return;
+      }
+
+      // ADMIN DIRETO
+      if (email === ADMIN_EMAIL && senha === ADMIN_SENHA) {
+        localStorage.setItem("user", JSON.stringify({
+          nome: "Administrador",
+          email: ADMIN_EMAIL,
+          role: "admin"
+        }));
+        loginDiv.classList.add("hidden");
+        adminDiv.classList.remove("hidden");
+        return;
+      }
+
+      try {
+        const q = query(
+          collection(db, "usuarios"),
+          where("email", "==", email),
+          where("senha", "==", senha)
+        );
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          alert("Email ou senha inválidos");
+          return;
+        }
+
+        let user = null;
+        snap.forEach(d => {
+          user = d.data();
+        });
+
+        localStorage.setItem("user", JSON.stringify(user));
+        loginDiv.classList.add("hidden");
+        painelDiv.classList.remove("hidden");
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao fazer login");
+      }
+    };
+
+    // PONTO
+    window.baterPonto = async () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        alert("Faça login novamente");
+        location.reload();
+        return;
+      }
+
+      try {
+        const agora = new Date();
+        await addDoc(collection(db, "pontos"), {
+          nome: user.nome,
+          data: agora.toLocaleString(),
+          dia: agora.toLocaleDateString(),
+          hora: agora.toLocaleTimeString()
+        });
+        alert("Ponto registrado com sucesso!");
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao registrar ponto");
+      }
+    };
+
+    // HISTÓRICO DO FUNCIONÁRIO
+    window.verHistorico = async () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        alert("Faça login novamente");
+        location.reload();
+        return;
+      }
+
+      try {
+        const q = query(collection(db, "pontos"), where("nome", "==", user.nome));
+        const snap = await getDocs(q);
+
+        historicoDiv.innerHTML = "";
+        if (snap.empty) {
+          historicoDiv.innerHTML = "<p class='subtitle'>Nenhum ponto registrado ainda.</p>";
+          return;
+        }
+
+        snap.forEach(d => {
+          const p = d.data();
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <strong>${p.data}</strong>
+            <small>Dia: ${p.dia} · Hora: ${p.hora}</small>
+          `;
+          historicoDiv.appendChild(div);
+        });
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao carregar histórico");
+      }
+    };
+
+    // ABRIR ADMIN
+    window.abrirAdmin = () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || user.email !== ADMIN_EMAIL) {
+        alert("Apenas o administrador pode acessar essa área.");
+        return;
+      }
+      painelDiv.classList.add("hidden");
+      adminDiv.classList.remove("hidden");
+    };
+
+    // LISTAR FUNCIONÁRIOS
+    window.listarFuncionarios = async () => {
+      try {
+        const snap = await getDocs(collection(db, "usuarios"));
+        adminConteudoDiv.innerHTML = "";
+
+        if (snap.empty) {
+          adminConteudoDiv.innerHTML = "<p class='subtitle'>Nenhum funcionário cadastrado.</p>";
+          return;
+        }
+
+        snap.forEach(docSnap => {
+          const u = docSnap.data();
+          const id = docSnap.id;
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <strong>${u.nome}</strong>
+            <small>${u.email}</small>
+            <button class="btn-danger" style="margin-top:6px; width:100%;" onclick="deletarFuncionario('${id}')">Deletar</button>
+          `;
+          adminConteudoDiv.appendChild(div);
+        });
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao listar funcionários");
+      }
+    };
+
+    // DELETAR FUNCIONÁRIO
+    window.deletarFuncionario = async (id) => {
+      if (!confirm("Deseja deletar este funcionário?")) return;
+      try {
+        await deleteDoc(doc(db, "usuarios", id));
+        alert("Funcionário deletado!");
+        listarFuncionarios();
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao deletar funcionário");
+      }
+    };
+
+    // VER TODOS OS PONTOS
+    window.verTodosPontos = async () => {
+      try {
+        const snap = await getDocs(collection(db, "pontos"));
+        adminConteudoDiv.innerHTML = "";
+
+        if (snap.empty) {
+          adminConteudoDiv.innerHTML = "<p class='subtitle'>Nenhum ponto registrado.</p>";
+          return;
+        }
+
+        snap.forEach(d => {
+          const p = d.data();
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <strong>${p.nome}</strong>
+            <small>${p.data}</small>
+          `;
+          adminConteudoDiv.appendChild(div);
+        });
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao carregar pontos");
+      }
+    };
+
+    // RELATÓRIO POR FUNCIONÁRIO
+    window.relatorioFuncionario = async () => {
+      try {
+        const snap = await getDocs(collection(db, "usuarios"));
+        adminConteudoDiv.innerHTML = "";
+
+        if (snap.empty) {
+          adminConteudoDiv.innerHTML = "<p class='subtitle'>Nenhum funcionário cadastrado.</p>";
+          return;
+        }
+
+        const titulo = document.createElement("p");
+        titulo.className = "subtitle";
+        titulo.textContent = "Selecione um funcionário para ver o relatório:";
+        adminConteudoDiv.appendChild(titulo);
+
+        snap.forEach(docSnap => {
+          const u = docSnap.data();
+          const btn = document.createElement("button");
+          btn.className = "btn-secondary";
+          btn.style.margin = "4px 0";
+          btn.style.width = "100%";
+          btn.textContent = u.nome;
+          btn.onclick = () => verRelatorio(u.nome);
+          adminConteudoDiv.appendChild(btn);
+        });
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao carregar funcionários");
+      }
+    };
+
+    window.verRelatorio = async (nome) => {
+      try {
+        const q = query(collection(db, "pontos"), where("nome", "==", nome));
+        const snap = await getDocs(q);
+
+        adminConteudoDiv.innerHTML = `<p class="subtitle">Relatório de <strong>${nome}</strong>:</p>`;
+        let total = 0;
+
+        if (snap.empty) {
+          adminConteudoDiv.innerHTML += "<p class='subtitle'>Nenhum ponto registrado.</p>";
+          return;
+        }
+
+        snap.forEach(d => {
+          const p = d.data();
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <strong>${p.data}</strong>
+            <small>Dia: ${p.dia} · Hora: ${p.hora}</small>
+          `;
+          adminConteudoDiv.appendChild(div);
+          total++;
+        });
+
+        const resumo = document.createElement("p");
+        resumo.className = "subtitle";
+        resumo.innerHTML = `Total de registros: <strong>${total}</strong>`;
+        adminConteudoDiv.appendChild(resumo);
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao gerar relatório");
+      }
+    };
+
+    // LOGOUT
+    window.logout = () => {
+      localStorage.removeItem("user");
+      location.reload();
+    };
+  </script>
 </body>
 </html>
