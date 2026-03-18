@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Sistema de Ponto</title>
+
+<style>
+body {font-family: Arial; background:#0f172a; color:white; text-align:center;}
+.box {background:#1e293b; padding:20px; margin:20px auto; width:320px; border-radius:10px;}
+input, button {margin:5px; padding:10px; width:90%; border-radius:5px; border:none;}
+button {background:#22c55e; color:white; cursor:pointer;}
+.hidden {display:none;}
+</style>
+</head>
+
+<body>
+
+<div id="login" class="box">
+<h2>Login</h2>
+<input id="loginEmail" placeholder="Email">
+<input id="loginSenha" type="password" placeholder="Senha">
+<button onclick="login()">Entrar</button>
+<button onclick="mostrarCadastro()">Cadastrar</button>
+</div>
+
+<div id="cadastro" class="box hidden">
+<h2>Cadastro</h2>
+<input id="nome" placeholder="Nome">
+<input id="email" placeholder="Email">
+<input id="senha" type="password" placeholder="Senha">
+<button onclick="cadastrar()">Salvar</button>
+<button onclick="voltarLogin()">Voltar</button>
+</div>
+
+<div id="painel" class="box hidden">
+<h2>Painel Funcionário</h2>
+<button onclick="baterPonto()">Bater Ponto</button>
+<button onclick="verHistorico()">Meu Histórico</button>
+<button onclick="abrirAdmin()">Admin</button>
+<button onclick="logout()">Sair</button>
+<div id="historico"></div>
+</div>
+
+<div id="admin" class="box hidden">
+<h2>Painel Admin</h2>
+<button onclick="listarFuncionarios()">Funcionários</button>
+<button onclick="verTodosPontos()">Todos os Pontos</button>
+<button onclick="relatorioFuncionario()">Relatório</button>
+<button onclick="voltarPainel()">Voltar</button>
+<div id="adminConteudo"></div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// 🔥 CONFIG FIREBASE
+const firebaseConfig = {
+  apiKey: "SUA_CHAVE",
+  authDomain: "SEU_DOMINIO",
+  projectId: "SEU_PROJETO"
+};
+
+// 🔐 ADMIN PADRÃO
+const ADMIN_EMAIL = "admin@gmail.com";
+const ADMIN_SENHA = "123456";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// TELAS
+window.mostrarCadastro = () => {
+ login.classList.add("hidden");
+ cadastro.classList.remove("hidden");
+};
+
+window.voltarLogin = () => {
+ cadastro.classList.add("hidden");
+ login.classList.remove("hidden");
+};
+
+window.voltarPainel = () => {
+ admin.classList.add("hidden");
+ painel.classList.remove("hidden");
+};
+
+// CADASTRO
+window.cadastrar = async () => {
+ await addDoc(collection(db,"usuarios"),{
+  nome:nome.value,
+  email:email.value,
+  senha:senha.value
+ });
+ alert("Cadastrado!");
+ voltarLogin();
+};
+
+// LOGIN
+window.login = async () => {
+
+ // ADMIN DIRETO
+ if (loginEmail.value === ADMIN_EMAIL && loginSenha.value === ADMIN_SENHA) {
+  localStorage.setItem("user", JSON.stringify({
+   nome:"Administrador",
+   email:ADMIN_EMAIL
+  }));
+  login.classList.add("hidden");
+  admin.classList.remove("hidden");
+  return;
+ }
+
+ const snap = await getDocs(collection(db,"usuarios"));
+ let user=null;
+
+ snap.forEach(d=>{
+  const u=d.data();
+  if(u.email==loginEmail.value && u.senha==loginSenha.value){
+   user=u;
+  }
+ });
+
+ if(user){
+  localStorage.setItem("user",JSON.stringify(user));
+  login.classList.add("hidden");
+  painel.classList.remove("hidden");
+ } else alert("Erro login");
+};
+
+// PONTO
+window.baterPonto = async ()=>{
+ const user=JSON.parse(localStorage.getItem("user"));
+ await addDoc(collection(db,"pontos"),{
+  nome:user.nome,
+  data:new Date().toLocaleString()
+ });
+ alert("Ponto registrado");
+};
+
+// HISTÓRICO
+window.verHistorico = async ()=>{
+ const user=JSON.parse(localStorage.getItem("user"));
+ const snap = await getDocs(collection(db,"pontos"));
+ historico.innerHTML="<h3>Histórico</h3>";
+ snap.forEach(d=>{
+  const p=d.data();
+  if(p.nome==user.nome){
+   historico.innerHTML+=`<p>${p.data}</p>`;
+  }
+ });
+};
+
+// ADMIN
+window.abrirAdmin = ()=>{
+ const user=JSON.parse(localStorage.getItem("user"));
+ if(user.email !== ADMIN_EMAIL){
+  alert("Apenas admin");
+  return;
+ }
+ painel.classList.add("hidden");
+ admin.classList.remove("hidden");
+};
+
+// LISTAR FUNCIONÁRIOS
+window.listarFuncionarios = async ()=>{
+ const snap = await getDocs(collection(db,"usuarios"));
+ adminConteudo.innerHTML="<h3>Funcionários</h3>";
+ snap.forEach(docSnap=>{
+  const u=docSnap.data();
+  const id=docSnap.id;
+  adminConteudo.innerHTML+=`
+   <div style="background:#334155; padding:10px; margin:5px;">
+    <p>${u.nome} - ${u.email}</p>
+    <button onclick="deletarFuncionario('${id}')">Deletar</button>
+   </div>
+  `;
+ });
+};
+
+// DELETAR
+window.deletarFuncionario = async (id)=>{
+ if(!confirm("Deseja deletar?")) return;
+ await deleteDoc(doc(db,"usuarios",id));
+ alert("Deletado!");
+ listarFuncionarios();
+};
+
+// TODOS PONTOS
+window.verTodosPontos = async ()=>{
+ const snap = await getDocs(collection(db,"pontos"));
+ adminConteudo.innerHTML="<h3>Todos Pontos</h3>";
+ snap.forEach(d=>{
+  const p=d.data();
+  adminConteudo.innerHTML+=`<p>${p.nome} - ${p.data}</p>`;
+ });
+};
+
+// RELATÓRIO
+window.relatorioFuncionario = async ()=>{
+ const snap = await getDocs(collection(db,"usuarios"));
+ adminConteudo.innerHTML="<h3>Selecionar Funcionário</h3>";
+ snap.forEach(docSnap=>{
+  const u=docSnap.data();
+  adminConteudo.innerHTML+=`
+   <button onclick="verRelatorio('${u.nome}')">${u.nome}</button>
+  `;
+ });
+};
+
+window.verRelatorio = async (nome)=>{
+ const snap = await getDocs(collection(db,"pontos"));
+ adminConteudo.innerHTML=`<h3>Relatório de ${nome}</h3>`;
+ let total=0;
+ snap.forEach(d=>{
+  const p=d.data();
+  if(p.nome===nome){
+   adminConteudo.innerHTML+=`<p>${p.data}</p>`;
+   total++;
+  }
+ });
+ adminConteudo.innerHTML+=`<hr><p>Total: ${total}</p>`;
+};
+
+// LOGOUT
+window.logout = ()=>{
+ localStorage.removeItem("user");
+ location.reload();
+};
+
+</script>
+
+</body>
+</html>
